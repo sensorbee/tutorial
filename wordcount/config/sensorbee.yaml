@@ -1,0 +1,3 @@
+topologies:
+  wordcount:
+    bql_file: wordcount.bql
