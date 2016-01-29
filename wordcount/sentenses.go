@@ -25,6 +25,18 @@ nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit
 in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint
 occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim
 id est laborum`, "\n", " ", -1), " ")
+	users := []string{"isabella", "jacob", "sophia", "ethan", "emma"}
+	usersProb := []float64{0.4, 0.3, 0.15, 0.1, 0.05}
+	pickName := func() string {
+		r := rand.Float64()
+		for i, p := range usersProb {
+			if r < p {
+				return users[i]
+			}
+			r -= p
+		}
+		return users[len(users)-1]
+	}
 
 	for {
 		l := rand.Intn(5) + 5
@@ -35,6 +47,7 @@ id est laborum`, "\n", " ", -1), " ")
 		}
 
 		t := core.NewTuple(data.Map{
+			"name": data.String(pickName()),
 			"text": data.String(strings.Join(text, " ")),
 		})
 		if err := w.Write(ctx, t); err != nil {
