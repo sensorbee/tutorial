@@ -1,0 +1,3 @@
+CREATE SOURCE sentences TYPE wc_sentences;
+CREATE STREAM words AS
+    SELECT RSTREAM name, text AS word FROM wc_tokenizer('sentences', 'text') [RANGE 1 TUPLES];
