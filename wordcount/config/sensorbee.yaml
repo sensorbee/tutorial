@@ -1,3 +1,6 @@
 topologies:
   wordcount:
     bql_file: wordcount.bql
+
+network:
+  listen_on: ":15601"
