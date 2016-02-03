@@ -1,2 +1,10 @@
 CREATE SOURCE public_tweets TYPE twitter_public_stream
-    WITH key_file = 'api_key.yaml';
+WITH key_file = 'api_key.yaml';
+
+CREATE SINK fluentd TYPE fluentd;
+
+CREATE STREAM tweets AS
+    SELECT RSTREAM
+        'sensorbee.tweets' AS tag, id_str AS id, lang, text,
+        user.screen_name AS screen_name, user.description AS description
+    FROM public_tweets [RANGE 1 TUPLES];
