@@ -1,0 +1,2 @@
+CREATE SOURCE public_tweets TYPE twitter_public_stream
+    WITH key_file = 'api_key.yaml';

@@ -1,0 +1,6 @@
+topologies:
+  twitter:
+    bql_file: twitter.bql
+
+network:
+  listen_on: ":15601"
