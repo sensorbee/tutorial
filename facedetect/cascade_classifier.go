@@ -107,6 +107,17 @@ func DrawRectsToImage(img data.Map, rects data.Array) (data.Map, error) {
 	mat := raw.ToMatVec3b()
 	defer mat.Delete()
 
+	brRects, err := convertToBridgeRects(rects)
+	if err != nil {
+		return nil, err
+	}
+
+	bridge.DrawRectsToImage(mat, brRects)
+	retRaw := opencv.ToRawData(mat)
+	return retRaw.ConvertToDataMap(), nil
+}
+
+func convertToBridgeRects(rects data.Array) ([]bridge.Rect, error) {
 	brRects := make([]bridge.Rect, len(rects))
 	for i, r := range rects {
 		rmap, err := data.AsMap(r)
@@ -145,8 +156,69 @@ func DrawRectsToImage(img data.Map, rects data.Array) (data.Map, error) {
 		}
 		brRects[i] = rect
 	}
+	return brRects, nil
+}
 
-	bridge.DrawRectsToImage(mat, brRects)
+// NewSharedImage returns shared image file to reduce I/O cost.
+func NewSharedImage(ctx *core.Context, params data.Map) (core.SharedState, error) {
+	var filePath string
+	if fp, err := params.Get(configFilePath); err != nil {
+		return nil, err
+	} else if filePath, err = data.AsString(fp); err != nil {
+		return nil, err
+	}
+	mat := bridge.LoadAlphaImage(filePath)
+	return &sharedImage{
+		img: mat,
+	}, nil
+}
+
+type sharedImage struct {
+	img bridge.MatVec4b
+}
+
+func (s *sharedImage) Terminate(ctx *core.Context) error {
+	s.img.Delete()
+	return nil
+}
+
+func lookupSharedImage(ctx *core.Context, name string) (*sharedImage, error) {
+	st, err := ctx.SharedStates.Get(name)
+	if err != nil {
+		return nil, err
+	}
+
+	if s, ok := st.(*sharedImage); ok {
+		return s, nil
+	}
+	return nil, fmt.Errorf("state '%v' cannot be canverted to shared_image.state",
+		name)
+}
+
+// MountAlphaImage draw target image on back image.
+func MountAlphaImage(ctx *core.Context, imgName string, back data.Map,
+	rects data.Array) (data.Map, error) {
+	if len(rects) == 0 {
+		return back, nil
+	}
+	img, err := lookupSharedImage(ctx, imgName)
+	if err != nil {
+		return nil, err
+	}
+
+	raw, err := opencv.ConvertMapToRawData(back)
+	if err != nil {
+		return nil, err
+	}
+	mat := raw.ToMatVec3b()
+	defer mat.Delete()
+
+	brRects, err := convertToBridgeRects(rects)
+	if err != nil {
+		return nil, err
+	}
+
+	bridge.MountAlphaImage(img.img, mat, brRects)
 	retRaw := opencv.ToRawData(mat)
 	return retRaw.ConvertToDataMap(), nil
 }

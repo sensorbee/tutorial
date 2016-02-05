@@ -76,3 +76,31 @@ func TestNewCascadeClassifier(t *testing.T) {
 		})
 	})
 }
+
+func TestNewSharedImage(t *testing.T) {
+	Convey("Given a SensorBee's core.Context", t, func() {
+		ctx := &core.Context{}
+		Convey("When create state with empty map", func() {
+			params := data.Map{}
+			_, err := NewSharedImage(ctx, params)
+			Convey("Then should return an error", func() {
+				So(err, ShouldNotBeNil)
+			})
+		})
+		Convey("When create state with file name", func() {
+			params := data.Map{
+				"file": data.String("not_exist.png"),
+			}
+			st, err := NewSharedImage(ctx, params)
+			So(err, ShouldBeNil)
+			Reset(func() {
+				st.Terminate(ctx)
+			})
+			Convey("Then state should be created", func() {
+				cc, ok := st.(*sharedImage)
+				So(ok, ShouldBeTrue)
+				So(cc.img, ShouldNotBeNil)
+			})
+		})
+	})
+}

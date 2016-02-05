@@ -21,8 +21,10 @@ typedef struct Rects {
 
 #ifdef __cplusplus
 typedef cv::CascadeClassifier* CascadeClassifier;
+typedef cv::Mat_<cv::Vec4b>* MatVec4b;
 #else
 typedef void* CascadeClassifier;
+typedef void* MatVec4b;
 #endif
 
 CascadeClassifier CascadeClassifier_New();
@@ -31,6 +33,10 @@ int CascadeClassifier_Load(CascadeClassifier cs, const char* name);
 struct Rects CascadeClassifier_DetectMultiScale(CascadeClassifier cs, MatVec3b img);
 void Rects_Delete(struct Rects rs);
 void DrawRectsToImage(MatVec3b img, struct Rects rects);
+
+void MatVec4b_Delete(MatVec4b m);
+MatVec4b LoadAlphaImg(const char* name);
+void MountAlphaImage(MatVec4b img, MatVec3b back, struct Rects rects);
 
 #ifdef __cplusplus
 }

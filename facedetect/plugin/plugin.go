@@ -19,4 +19,10 @@ func init() {
 		udf.MustConvertGeneric(facedetect.DetectMultiScale))
 	udf.MustRegisterGlobalUDF("facedetect_draw_rects",
 		udf.MustConvertGeneric(facedetect.DrawRectsToImage))
+
+	// mount image
+	udf.MustRegisterGlobalUDSCreator("facedetect_shared_image",
+		udf.UDSCreatorFunc(facedetect.NewSharedImage))
+	udf.MustRegisterGlobalUDF("facedetect_mount_image",
+		udf.MustConvertGeneric(facedetect.MountAlphaImage))
 }

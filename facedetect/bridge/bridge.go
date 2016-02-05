@@ -71,6 +71,17 @@ func (c *CascadeClassifier) DetectMultiScale(img bridge.MatVec3b) []Rect {
 	return rects
 }
 
+// MatVec4b is a bind of `cv::Mat_<cv::Vec4b>`
+type MatVec4b struct {
+	p C.MatVec4b
+}
+
+// Delete object.
+func (m *MatVec4b) Delete() {
+	C.MatVec4b_Delete(m.p)
+	m.p = nil
+}
+
 // DrawRectsToImage draws rectangle information to target image.
 func DrawRectsToImage(img bridge.MatVec3b, rects []Rect) {
 	cRectArray := make([]C.struct_Rect, len(rects))
@@ -88,4 +99,31 @@ func DrawRectsToImage(img bridge.MatVec3b, rects []Rect) {
 		length: C.int(len(rects)),
 	}
 	C.DrawRectsToImage(C.MatVec3b(img.GetCPointer()), cRects)
+}
+
+// LoadAlphaImage loads RGBA type image.
+func LoadAlphaImage(name string) MatVec4b {
+	cName := C.CString(name)
+	defer C.free(unsafe.Pointer(cName))
+	return MatVec4b{p: C.LoadAlphaImg(cName)}
+}
+
+// MountAlphaImage draws img on back leading to rects. img is required RGBA,
+// TODO should be check file type.
+func MountAlphaImage(img MatVec4b, back bridge.MatVec3b, rects []Rect) {
+	cRectArray := make([]C.struct_Rect, len(rects))
+	for i, r := range rects {
+		cRect := C.struct_Rect{
+			x:      C.int(r.X),
+			y:      C.int(r.Y),
+			width:  C.int(r.Width),
+			height: C.int(r.Height),
+		}
+		cRectArray[i] = cRect
+	}
+	cRects := C.struct_Rects{
+		rects:  (*C.Rect)(&cRectArray[0]),
+		length: C.int(len(rects)),
+	}
+	C.MountAlphaImage(img.p, C.MatVec3b(back.GetCPointer()), cRects)
 }
