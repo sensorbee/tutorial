@@ -3,8 +3,9 @@ WITH key_file = 'api_key.yaml';
 
 CREATE SINK fluentd TYPE fluentd;
 
-CREATE STREAM tweets AS
+CREATE STREAM en_tweets AS
     SELECT RSTREAM
         'sensorbee.tweets' AS tag, id_str AS id, lang, text,
         user.screen_name AS screen_name, user.description AS description
-    FROM public_tweets [RANGE 1 TUPLES];
+    FROM public_tweets [RANGE 1 TUPLES]
+    WHERE lang = 'en';
