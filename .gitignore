@@ -1,7 +1,7 @@
 sensorbee
 sensorbee_main.go
-twitter/config/api_key.yaml
-twitter/config/.bundle
-twitter/config/output.*
-twitter/config/Gemfile.lock
-twitter/config/vendor
+ml/config/api_key.yaml
+ml/config/.bundle
+ml/config/output.*
+ml/config/Gemfile.lock
+ml/config/vendor
