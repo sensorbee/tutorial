@@ -50,7 +50,7 @@ func init() {
 	// consider words appearing too often less valuable. Thus, they don't
 	// have to be removed actually. This is provided as a demonstration.
 	ws := []string{"a", "the", "be", "is", "am", "are", "it", "this", "that",
-		"and", "or", "not", "as"}
+		"and", "or", "not", "as", "to"}
 	for _, w := range ws {
 		stopWords[w] = struct{}{}
 	}

@@ -9,3 +9,27 @@ CREATE STREAM en_tweets AS
         user.screen_name AS screen_name, user.description AS description
     FROM public_tweets [RANGE 1 TUPLES]
     WHERE lang = 'en';
+
+CREATE STREAM preprocessed_tweets AS
+    SELECT RSTREAM
+        filter_stop_words(
+            nlp_split(
+            nlp_to_lower(
+            filter_punctuation_marks(text)),
+        ' ')) AS text_vector,
+        filter_stop_words(
+            nlp_split(
+            nlp_to_lower(
+            filter_punctuation_marks(description)),
+        ' ')) AS description_vector,
+        *
+    FROM en_tweets [RANGE 1 TUPLES];
+
+CREATE STREAM fv_tweets AS
+    SELECT RSTREAM
+        {
+            'text': nlp_weight_tf(text_vector),
+            'description': nlp_weight_tf(description_vector)
+        } AS feature_vector,
+        tag, id, lang, text, description
+    FROM preprocessed_tweets [RANGE 1 TUPLES];

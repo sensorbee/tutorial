@@ -1,3 +1,5 @@
 plugins:
   - github.com/sensorbee/twitter/plugin
   - github.com/sensorbee/fluentd/plugin
+  - github.com/sensorbee/nlp/plugin
+  - github.com/sensorbee/tutorial/ml/plugin
