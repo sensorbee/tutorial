@@ -3,3 +3,4 @@ plugins:
   - github.com/sensorbee/fluentd/plugin
   - github.com/sensorbee/nlp/plugin
   - github.com/sensorbee/tutorial/ml/plugin
+  - github.com/sensorbee/jubatus/classifier/plugin

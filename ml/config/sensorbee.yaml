@@ -4,3 +4,9 @@ topologies:
 
 network:
   listen_on: ":15601"
+
+storage:
+  uds:
+    type: fs
+    params:
+      dir: uds
