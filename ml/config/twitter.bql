@@ -14,14 +14,12 @@ CREATE STREAM preprocessed_tweets AS
     SELECT RSTREAM
         filter_stop_words(
             nlp_split(
-            nlp_to_lower(
-            filter_punctuation_marks(text)),
-        ' ')) AS text_vector,
+                nlp_to_lower(filter_punctuation_marks(text)),
+            ' ')) AS text_vector,
         filter_stop_words(
             nlp_split(
-            nlp_to_lower(
-            filter_punctuation_marks(description)),
-        ' ')) AS description_vector,
+                nlp_to_lower(filter_punctuation_marks(description)),
+            ' ')) AS description_vector,
         *
     FROM en_tweets [RANGE 1 TUPLES];
 
@@ -31,7 +29,7 @@ CREATE STREAM fv_tweets AS
             'text': nlp_weight_tf(text_vector),
             'description': nlp_weight_tf(description_vector)
         } AS feature_vector,
-        tag, id, lang, text, description
+        tag, id, screen_name, lang, text, description
     FROM preprocessed_tweets [RANGE 1 TUPLES];
 
 LOAD STATE gender_model TYPE jubaclassifier_arow
@@ -48,7 +46,7 @@ CREATE STREAM labeled_tweets AS
     SELECT RSTREAM
         juba_classified_label(jubaclassify('gender_model', feature_vector)) AS gender,
         juba_classified_label(jubaclassify('age_model', feature_vector)) AS age,
-        tag, id, lang, text, description
+        tag, id, screen_name, lang, text, description
     FROM fv_tweets [RANGE 1 TUPLES];
 
 INSERT INTO fluentd from labeled_tweets;
