@@ -1,0 +1,48 @@
+CREATE STATE gender_model TYPE jubaclassifier_arow
+    WITH label_field = 'gender', regularization_weight = 0.001;
+CREATE SINK gender_model_trainer TYPE uds WITH name = 'gender_model';
+CREATE STATE age_model TYPE jubaclassifier_arow
+    WITH label_field = 'age', regularization_weight = 0.001;
+CREATE SINK age_model_trainer TYPE uds WITH name = 'age_model';
+
+CREATE PAUSED SOURCE training_data TYPE file WITH path = 'training_tweets.json';
+
+-- copied and modified from twitter.bql
+CREATE STREAM en_tweets AS
+    SELECT RSTREAM
+        'sensorbee.tweets' AS tag, id_str AS id, text,
+        user.screen_name AS screen_name, user.description AS description,
+        age, gender
+    FROM training_data [RANGE 1 TUPLES];
+
+CREATE STREAM preprocessed_tweets AS
+    SELECT RSTREAM
+        filter_stop_words(
+            nlp_split(
+                nlp_to_lower(filter_punctuation_marks(text)),
+            ' ')) AS text_vector,
+        filter_stop_words(
+            nlp_split(
+                nlp_to_lower(filter_punctuation_marks(description)),
+            ' ')) AS description_vector,
+        age, gender
+    FROM en_tweets [RANGE 1 TUPLES];
+
+CREATE STREAM fv_tweets AS
+    SELECT RSTREAM
+        {
+            'text': nlp_weight_tf(text_vector),
+            'description': nlp_weight_tf(description_vector)
+        } AS feature_vector,
+        age, gender
+    FROM preprocessed_tweets [RANGE 1 TUPLES];
+
+CREATE STREAM gender_labeled_tweets AS
+    SELECT RSTREAM * FROM fv_tweets [RANGE 1 TUPLES] WHERE gender != '';
+CREATE STREAM age_labeled_tweets AS
+    SELECT RSTREAM * FROM fv_tweets [RANGE 1 TUPLES] WHERE age != '';
+
+INSERT INTO gender_model_trainer FROM gender_labeled_tweets;
+INSERT INTO age_model_trainer FROM age_labeled_tweets;
+
+RESUME SOURCE training_data;

@@ -10,3 +10,6 @@ storage:
     type: fs
     params:
       dir: uds
+
+logging:
+  log_dropped_tuples: true
