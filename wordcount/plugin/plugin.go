@@ -2,8 +2,8 @@ package plugin
 
 import (
 	"github.com/sensorbee/tutorial/wordcount"
-	"pfi/sensorbee/sensorbee/bql"
-	"pfi/sensorbee/sensorbee/bql/udf"
+	"gopkg.in/sensorbee/sensorbee.v0/bql"
+	"gopkg.in/sensorbee/sensorbee.v0/bql/udf"
 )
 
 func init() {
