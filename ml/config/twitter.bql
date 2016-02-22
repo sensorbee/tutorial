@@ -1,5 +1,5 @@
 CREATE SOURCE public_tweets TYPE twitter_public_stream
-WITH key_file = 'api_key.yaml';
+    WITH key_file = 'api_key.yaml';
 
 CREATE SINK fluentd TYPE fluentd;
 
@@ -35,12 +35,9 @@ CREATE STREAM fv_tweets AS
 LOAD STATE gender_model TYPE jubaclassifier_arow
     OR CREATE IF NOT SAVED
     WITH label_field = 'gender', regularization_weight = 0.001;
-CREATE SINK gender_model_trainer TYPE uds WITH name = 'gender_model';
-
 LOAD STATE age_model TYPE jubaclassifier_arow
     OR CREATE IF NOT SAVED
     WITH label_field = 'age', regularization_weight = 0.001;
-CREATE SINK age_model_trainer TYPE uds WITH name = 'age_model';
 
 CREATE STREAM labeled_tweets AS
     SELECT RSTREAM
