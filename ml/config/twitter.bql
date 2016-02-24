@@ -1,48 +1,48 @@
 CREATE SOURCE public_tweets TYPE twitter_public_stream
-    WITH key_file = 'api_key.yaml';
+    WITH key_file = "api_key.yaml";
 
 CREATE SINK fluentd TYPE fluentd;
 
 CREATE STREAM en_tweets AS
     SELECT RSTREAM
-        'sensorbee.tweets' AS tag, id_str AS id, lang, text,
+        "sensorbee.tweets" AS tag, id_str AS id, lang, text,
         user.screen_name AS screen_name, user.description AS description
     FROM public_tweets [RANGE 1 TUPLES]
-    WHERE lang = 'en';
+    WHERE lang = "en";
 
 CREATE STREAM preprocessed_tweets AS
     SELECT RSTREAM
         filter_stop_words(
             nlp_split(
                 nlp_to_lower(filter_punctuation_marks(text)),
-            ' ')) AS text_vector,
+            " ")) AS text_vector,
         filter_stop_words(
             nlp_split(
                 nlp_to_lower(filter_punctuation_marks(description)),
-            ' ')) AS description_vector,
+            " ")) AS description_vector,
         *
     FROM en_tweets [RANGE 1 TUPLES];
 
 CREATE STREAM fv_tweets AS
     SELECT RSTREAM
         {
-            'text': nlp_weight_tf(text_vector),
-            'description': nlp_weight_tf(description_vector)
+            "text": nlp_weight_tf(text_vector),
+            "description": nlp_weight_tf(description_vector)
         } AS feature_vector,
         tag, id, screen_name, lang, text, description
     FROM preprocessed_tweets [RANGE 1 TUPLES];
 
 LOAD STATE age_model TYPE jubaclassifier_arow
     OR CREATE IF NOT SAVED
-    WITH label_field = 'age', regularization_weight = 0.001;
+    WITH label_field = "age", regularization_weight = 0.001;
 LOAD STATE gender_model TYPE jubaclassifier_arow
     OR CREATE IF NOT SAVED
-    WITH label_field = 'gender', regularization_weight = 0.001;
+    WITH label_field = "gender", regularization_weight = 0.001;
 
 CREATE STREAM labeled_tweets AS
     SELECT RSTREAM
-        juba_classified_label(jubaclassify('age_model', feature_vector)) AS age,
-        juba_classified_label(jubaclassify('gender_model', feature_vector)) AS gender,
+        juba_classified_label(jubaclassify("age_model", feature_vector)) AS age,
+        juba_classified_label(jubaclassify("gender_model", feature_vector)) AS gender,
         tag, id, screen_name, lang, text, description
     FROM fv_tweets [RANGE 1 TUPLES];
 
