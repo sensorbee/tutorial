@@ -1,9 +1,9 @@
-CREATE STATE gender_model TYPE jubaclassifier_arow
-    WITH label_field = 'gender', regularization_weight = 0.001;
-CREATE SINK gender_model_trainer TYPE uds WITH name = 'gender_model';
 CREATE STATE age_model TYPE jubaclassifier_arow
     WITH label_field = 'age', regularization_weight = 0.001;
 CREATE SINK age_model_trainer TYPE uds WITH name = 'age_model';
+CREATE STATE gender_model TYPE jubaclassifier_arow
+    WITH label_field = 'gender', regularization_weight = 0.001;
+CREATE SINK gender_model_trainer TYPE uds WITH name = 'gender_model';
 
 CREATE PAUSED SOURCE training_data TYPE file WITH path = 'training_tweets.json';
 
@@ -37,12 +37,12 @@ CREATE STREAM fv_tweets AS
         age, gender
     FROM preprocessed_tweets [RANGE 1 TUPLES];
 
-CREATE STREAM gender_labeled_tweets AS
-    SELECT RSTREAM * FROM fv_tweets [RANGE 1 TUPLES] WHERE gender != '';
 CREATE STREAM age_labeled_tweets AS
     SELECT RSTREAM * FROM fv_tweets [RANGE 1 TUPLES] WHERE age != '';
+CREATE STREAM gender_labeled_tweets AS
+    SELECT RSTREAM * FROM fv_tweets [RANGE 1 TUPLES] WHERE gender != '';
 
-INSERT INTO gender_model_trainer FROM gender_labeled_tweets;
 INSERT INTO age_model_trainer FROM age_labeled_tweets;
+INSERT INTO gender_model_trainer FROM gender_labeled_tweets;
 
 RESUME SOURCE training_data;

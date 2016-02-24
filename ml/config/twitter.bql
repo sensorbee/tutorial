@@ -32,17 +32,17 @@ CREATE STREAM fv_tweets AS
         tag, id, screen_name, lang, text, description
     FROM preprocessed_tweets [RANGE 1 TUPLES];
 
-LOAD STATE gender_model TYPE jubaclassifier_arow
-    OR CREATE IF NOT SAVED
-    WITH label_field = 'gender', regularization_weight = 0.001;
 LOAD STATE age_model TYPE jubaclassifier_arow
     OR CREATE IF NOT SAVED
     WITH label_field = 'age', regularization_weight = 0.001;
+LOAD STATE gender_model TYPE jubaclassifier_arow
+    OR CREATE IF NOT SAVED
+    WITH label_field = 'gender', regularization_weight = 0.001;
 
 CREATE STREAM labeled_tweets AS
     SELECT RSTREAM
-        juba_classified_label(jubaclassify('gender_model', feature_vector)) AS gender,
         juba_classified_label(jubaclassify('age_model', feature_vector)) AS age,
+        juba_classified_label(jubaclassify('gender_model', feature_vector)) AS gender,
         tag, id, screen_name, lang, text, description
     FROM fv_tweets [RANGE 1 TUPLES];
 
