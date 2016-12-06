@@ -1,0 +1,7 @@
+commands:
+  run:
+  runfile:
+  shell:
+  topology:
+  hello:
+    path: github.com/sensorbee/tutorial/custom_command/hello
